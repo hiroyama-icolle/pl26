@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Ubuntuの仮想環境にCodex CLIを導入し、初期設定からアプリ開発まで体験する手順書です。">
+  <title>Codex CLI 導入・初期設定手順書</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #182536;
+      --muted: #607086;
+      --paper: #fff;
+      --canvas: #f3f6fa;
+      --line: #dce4ed;
+      --accent: #176b58;
+      --accent-soft: #e5f4ef;
+      --code: #14202d;
+      --code-ink: #eaf2fa;
+      --warm: #fff5dd;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      line-height: 1.8;
+    }
+    a { color: var(--accent); }
+    .hero {
+      padding: 64px 24px 58px;
+      color: white;
+      background: radial-gradient(circle at 85% 15%, #43957b 0, transparent 30%), linear-gradient(125deg, #102b35, #176b58 70%, #24775f);
+    }
+    .hero-inner, main { width: min(100% - 40px, 1020px); margin-inline: auto; }
+    .eyebrow { margin: 0 0 8px; color: #b9e6d8; font-size: .82rem; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { max-width: 800px; margin: 0; font-size: clamp(2rem, 5vw, 3.35rem); line-height: 1.25; letter-spacing: -.035em; }
+    .hero p { max-width: 760px; margin: 18px 0 0; color: #e0f0eb; font-size: 1.04rem; }
+    .hero strong { color: white; }
+    main { padding: 34px 0 70px; }
+    .intro-note { margin-bottom: 26px; padding: 18px 22px; border: 1px solid #c8e4d9; border-radius: 14px; background: var(--accent-soft); }
+    .intro-note p { margin: 0; }
+    .layout { display: grid; grid-template-columns: 235px minmax(0, 1fr); gap: 24px; align-items: start; }
+    nav, .section-card { border: 1px solid var(--line); border-radius: 16px; background: var(--paper); box-shadow: 0 8px 26px #18354a0a; }
+    nav { position: sticky; top: 18px; padding: 18px; }
+    nav h2 { margin: 0 0 10px; font-size: .95rem; }
+    nav ol { margin: 0; padding-left: 1.25rem; color: var(--muted); }
+    nav li { padding: 3px 0; }
+    nav a { text-decoration: none; font-size: .9rem; }
+    nav a:hover { text-decoration: underline; }
+    .content { display: grid; gap: 18px; min-width: 0; }
+    .section-card { padding: clamp(20px, 4vw, 32px); scroll-margin-top: 20px; }
+    .section-heading { display: flex; gap: 14px; align-items: center; margin: 0 0 18px; }
+    .number { display: grid; width: 40px; height: 40px; flex: 0 0 auto; place-items: center; border-radius: 12px; background: var(--accent-soft); color: var(--accent); font-weight: 800; }
+    h2 { margin: 0; font-size: clamp(1.25rem, 3vw, 1.65rem); line-height: 1.4; }
+    h3 { margin: 25px 0 8px; font-size: 1.08rem; }
+    p { margin: 10px 0; }
+    ul, ol { padding-left: 1.45rem; }
+    li { padding-left: .15rem; }
+    .lead { color: var(--muted); }
+    .callout { margin: 18px 0; padding: 14px 17px; border-left: 4px solid #e7a939; border-radius: 8px; background: var(--warm); }
+    .callout p { margin: 0; }
+    .callout.info { border-color: #57a88b; background: #eff8f4; }
+    .steps { padding-left: 1.3rem; }
+    .steps li { margin: 7px 0; }
+    .code-wrap { position: relative; margin: 12px 0 18px; }
+    pre { overflow-x: auto; margin: 0; padding: 17px 18px; border-radius: 11px; background: var(--code); color: var(--code-ink); font: .91rem/1.65 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; tab-size: 2; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    p code, li code { padding: .12em .38em; border-radius: 5px; background: #edf1f5; font-size: .92em; }
+    pre code { padding: 0; background: none; }
+    .copy { position: absolute; top: 9px; right: 9px; padding: 6px 10px; border: 1px solid #ffffff42; border-radius: 7px; background: #263848; color: white; font: inherit; font-size: .77rem; cursor: pointer; }
+    .copy:hover { background: #344c60; }
+    .result { margin-top: -8px; color: var(--muted); font-size: .92rem; }
+    .exercise { margin-top: 22px; padding: 17px 19px; border: 1px dashed #9cbdaf; border-radius: 12px; background: #f5faf7; }
+    .exercise strong { color: var(--accent); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { width: 32%; color: var(--muted); font-weight: 650; }
+    footer { padding: 22px; color: var(--muted); text-align: center; font-size: .85rem; }
+    @media (max-width: 760px) {
+      .hero { padding: 44px 0; }
+      .hero-inner, main { width: min(100% - 28px, 1020px); }
+      .layout { grid-template-columns: 1fr; }
+      nav { position: static; }
+      nav ol { columns: 2; }
+    }
+    @media print {
+      body { background: white; }
+      .hero { padding: 25px 0; color: var(--ink); background: white; border-bottom: 2px solid var(--accent); }
+      .hero p, .eyebrow { color: var(--muted); }
+      .layout { display: block; }
+      nav, .copy { display: none; }
+      .section-card { margin: 14px 0; box-shadow: none; break-inside: avoid; }
+      pre { white-space: pre-wrap; overflow-wrap: anywhere; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Workshop guide · Ubuntu / Vagrant</p>
+      <h1>Codex CLI<br>導入・初期設定手順書</h1>
+      <p><strong>Codex CLIは、ターミナルからAIエージェントを利用するためのツールです。</strong>自然な言葉で指示すると、ファイルの読み書きやプログラムの実行などを支援します。</p>
+      <p>この手順書では、仮想環境にCodex CLIを導入し、アカウント認証やファイル操作の設定を行ったあと、小さなCLIアプリの開発まで体験します。CodexはホストOS上やVS Codeなどでも利用できます。</p>
+      <p>本手順書は作成時点の情報に基づいています。Codex CLIやUbuntuの更新により、画面表示やコマンドが変わる場合があります。</p>
+      <p>更新日：2026年11月2日</p>
+    </div>
+  </header>
+
+  <main>
+    <div class="intro-note"><p><strong>この演習について：</strong>今回は練習用の仮想環境で作業します。既存の環境を利用し、新しい仮想環境は原則として作成しません。</p></div>
+    <div class="layout">
+      <nav aria-label="目次">
+        <h2>このページの内容</h2>
+        <ol>
+          <li><a href="#prerequisites">前提環境</a></li>
+          <li><a href="#install">インストール</a></li>
+          <li><a href="#auth">アカウント認証</a></li>
+          <li><a href="#sandbox-setup">ファイル操作の設定</a></li>
+          <li><a href="#file-operations">ファイル操作</a></li>
+          <li><a href="#agents">AGENTS.md</a></li>
+          <li><a href="#git">Git関連の設定</a></li>
+          <li><a href="#app">アプリの開発</a></li>
+          <li><a href="#summary">まとめ</a></li>
+        </ol>
+      </nav>
+
+      <div class="content">
+        <section class="section-card" id="prerequisites">
+          <div class="section-heading"><span class="number">01</span><h2>前提環境</h2></div>
+          <div class="table-wrap"><table>
+            <tbody>
+              <tr><th>仮想環境</th><td>Vagrant</td></tr>
+              <tr><th>OS</th><td>Ubuntu</td></tr>
+              <tr><th>使用するBox</th><td>既存環境を確認して、良さそうなものを選びましょう。今回は新しい仮想環境は作りません。</td></tr>
+              <tr><th>ユーザー</th><td><code>vagrant</code></td></tr>
+              <tr><th>認証方式</th><td>ChatGPTアカウント</td></tr>
+              <tr><th>作業ディレクトリ</th><td><code>/home/vagrant/jugyo/codexrensyu</code></td></tr>
+            </tbody>
+          </table></div>
+          <div class="callout"><p>使えるBoxが見つからない場合は、新しく作成しましょう。その場合は<a href="https://note.com/itcollege/n/nf5c3af2df870">仮想マシン構築の解説（4. 仮想マシン構築）</a>を参考にしてください。</p></div>
+          <p>仮想環境に入り、作業ディレクトリ(~/jugyo/codexrensyu)を作成しておきましょう。</p>
+        </section>
+
+        <section class="section-card" id="install">
+          <div class="section-heading"><span class="number">02</span><h2>Codex CLIのインストール</h2></div>
+          <p>ターミナルでインストールコマンドを実行します。</p>
+          <div class="code-wrap"><pre><code>curl -fsSL https://chatgpt.com/codex/install.sh | sh</code></pre></div>
+          <h3>PATHを設定する</h3>
+          <p><code>~/.bashrc</code>を開き、ファイルの末尾に次の設定があるか確認します。なければ追記して保存してください。</p>
+          <div class="code-wrap"><pre><code>vim ~/.bashrc</code></pre></div>
+          <div class="code-wrap"><pre><code>export PATH="$HOME/.local/bin:$PATH"</code></pre></div>
+          <p>設定を反映して、Codex CLIのバージョンを確認します。</p>
+          <div class="code-wrap"><pre><code>source ~/.bashrc
+codex --version</code></pre><button class="copy" type="button">コピー</button></div>
+          <p class="result">バージョン情報（例：<code>codex-cli 0.162.1</code>）が表示されれば、インストールされています。</p>
+        </section>
+
+        <section class="section-card" id="auth">
+          <div class="section-heading"><span class="number">03</span><h2>ChatGPTアカウントの認証</h2></div>
+          <p>作業ディレクトリに移動し、Codex CLIを起動します。</p>
+          <div class="code-wrap"><pre><code>cd /home/vagrant/jugyo/codexrensyu
+codex</code></pre><button class="copy" type="button">コピー</button></div>
+          <ol class="steps">
+            <li>認証方法から <strong>Sign in with Device Code</strong> を選び、Enterキーを押します。</li>
+            <li>表示されたURLをコピーし、ブラウザで開きます。</li>
+            <li>ChatGPTアカウントを確認して、アクセスを許可します。</li>
+            <li>ターミナルに表示されたデバイスコードを入力します。</li>
+            <li>ターミナルに戻り、Enterキーを押します。</li>
+            <li>チャット画面で「こんにちは」と入力し、応答を確認します。</li>
+          </ol>
+          <p>Codex CLIを終了するときは、チャット入力欄で次を入力します。</p>
+          <div class="code-wrap"><pre><code>/exit</code></pre><button class="copy" type="button">コピー</button></div>
+        </section>
+
+        <section class="section-card" id="sandbox-setup">
+          <div class="section-heading"><span class="number">04</span><h2>ファイル操作のための設定</h2></div>
+          <p>Codex CLIにファイル操作をしてもらえるよう、仮想環境のサンドボックスに必要な設定を行います。以下の操作はCodexを終了したターミナルで実行してください。</p>
+          <h3>必要なパッケージをインストール</h3>
+          <div class="code-wrap"><pre><code>sudo apt update
+sudo apt install -y bubblewrap apparmor-profiles apparmor-utils</code></pre><button class="copy" type="button">コピー</button></div>
+          <h3>AppArmorプロファイルを有効化</h3>
+          <div class="code-wrap"><pre><code>sudo install -m 0644 \
+  /usr/share/apparmor/extra-profiles/bwrap-userns-restrict \
+  /etc/apparmor.d/bwrap-userns-restrict
+
+sudo apparmor_parser -r /etc/apparmor.d/bwrap-userns-restrict</code></pre><button class="copy" type="button">コピー</button></div>
+          <h3>Bubblewrapの動作確認</h3>
+          <div class="code-wrap"><pre><code>/usr/bin/bwrap \
+  --ro-bind / / \
+  --proc /proc \
+  --dev /dev \
+  /bin/true
+
+echo "exit code: $?"</code></pre><button class="copy" type="button">コピー</button></div>
+          <p class="result">実行結果に <code>exit code: 0</code> と表示されたらOKです。</p>
+          <h3>Codexのサンドボックスを確認</h3>
+          <div class="code-wrap"><pre><code>codex sandbox -- /bin/pwd</code></pre><button class="copy" type="button">コピー</button></div>
+          <p class="result">現在のディレクトリが表示されたらOKです。</p>
+        </section>
+
+        <section class="section-card" id="file-operations">
+          <div class="section-heading"><span class="number">05</span><h2>Codexでファイルを操作する</h2></div>
+          <p>codexコマンドでCodex CLIを起動し、次の指示を入力してみましょう。</p>
+          <div class="code-wrap"><pre><code>"Hello World"と記述したhello.txtを作成してください</code></pre><button class="copy" type="button">コピー</button></div>
+          <p>ファイルが作成されたか確認します。確認方法は自由です。</p>
+          <div class="exercise"><strong>演習</strong><p>ほかにも、いくつかファイルの作成やプログラムの実行を試してみましょう。</p></div>
+        </section>
+
+        <section class="section-card" id="agents">
+          <div class="section-heading"><span class="number">06</span><h2>AGENTS.mdを作成する</h2></div>
+          <p><code>AGENTS.md</code>は、Codexエージェントに「このプロジェクトでは、どんなルールで作業してほしいか」を伝える説明書です。人間の開発者が読む開発ルールや作業ガイドを、Codexにも用意するイメージです。</p>
+          <p>最初からすべて書く必要はありません。プロジェクトに合ったルールを少しずつ整えていけば十分です。</p>
+          <p>まずは、Codexに次の指示を入力してファイルを作ってもらいましょう。</p>
+          <div class="code-wrap"><pre><code>「アシスタントは日本語を主体として応答してください。」を記入したAGENTS.mdを作成してください</code></pre><button class="copy" type="button">コピー</button></div>
+          <p>作成後、<code>cat</code>コマンドなどで内容を確認します。</p>
+          <div class="exercise"><strong>演習</strong><p>エージェントに事前に伝えておきたいルールを追加してみましょう。どんな内容にするか迷ったら、エージェントや周りの人と相談してみてください。</p></div>
+        </section>
+
+        <section class="section-card" id="git">
+          <div class="section-heading"><span class="number">07</span><h2>Git関連の設定</h2></div>
+          <p>今回は、できるだけエージェントに作業を任せてみましょう。</p>
+          <div class="callout info"><p>ブラウザ操作などエージェントだけでは難しい作業は、自分で行うか、周りの人のサポートを活用しましょう。</p></div>
+        </section>
+
+        <section class="section-card" id="app">
+          <div class="section-heading"><span class="number">08</span><h2>アプリを開発する</h2></div>
+          <p>演習として、Ubuntuで使える小さなCLIツールを作ってみましょう。Codex CLIに次のプロンプトを入力します。</p>
+          <div class="code-wrap"><pre><code>Ubuntuで動作する、システム情報チェッカーをBashで作成してください。
+
+以下の情報を取得し、日本語で見やすくターミナルに表示してください。
+
+- コンピューター名
+- OSの名称とバージョン
+- CPUのコア数
+- メモリの総容量と使用量
+- ディスクの総容量と使用量
+- システムの稼働時間
+
+作成するファイルは `system-check.sh` としてください。
+
+初心者にも読みやすいシンプルなコードにし、処理内容には日本語のコメントを付けてください。
+
+また、実行方法と使用したLinuxコマンドについて説明した `system-check.md` も作成してください。</code></pre><button class="copy" type="button">プロンプトをコピー</button></div>
+        </section>
+
+        <section class="section-card" id="summary">
+          <div class="section-heading"><span class="number">09</span><h2>まとめ</h2></div>
+          <p>Codex CLIを使った実装から、AIエージェントのサポートによるアプリの開発・実行まで体験できました。</p>
+          <p>チャット型生成AIと比べて、AIエージェントはファイルの作成やプログラムの実装、実行、修正までを一連の作業として進められることが大きな特徴です。</p>
+          <div class="exercise"><strong>最後の演習</strong><p>今回学んだことを活用して、自分が実際に使ってみたいオリジナルアプリをCodex CLIで作成してみましょう。</p></div>
+        </section>
+      </div>
+    </div>
+  </main>
+  <footer>Codex CLI 導入・初期設定手順書</footer>
+  <script>
+    document.querySelectorAll('.copy').forEach((button) => {
+      button.addEventListener('click', async () => {
+        const code = button.closest('.code-wrap').querySelector('code').innerText;
+        const original = button.textContent;
+        try {
+          await navigator.clipboard.writeText(code);
+          button.textContent = 'コピーしました';
+        } catch {
+          button.textContent = 'コピーできません';
+        }
+        window.setTimeout(() => { button.textContent = original; }, 1600);
+      });
+    });
+  </script>
+</body>
+</html>
